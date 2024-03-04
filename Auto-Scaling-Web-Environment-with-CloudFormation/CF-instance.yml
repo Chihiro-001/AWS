@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create EC2 Instance
+Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair.
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Can contain only ASCII characters.
+  EC2AMI:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  HostZoneId:
+    Description: FQDN of the hosted zone.
+    Type: String
+    Default: 'Z03917251J40DXFLPJW6J'
+  DomainName:
+    Description: FQDN of the HostZone yumetech.net
+    Type: String
+    Default: yumetech.net
+  SubjectAlternativeName:
+    Description: FQDN of the Subdomains.
+    Type: String
+    Default: '*.yumetech.net'
+  SubDomain:
+    Description: FQDN of the Subdomain
+    Type: String
+    Default: www.yumetech.net
+    
+Resources:
+  # ---------------------
+  # EC2 for pub sub 1A
+  # ---------------------
+  MyEC2Instance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref EC2AMI
+      InstanceType: t2.micro
+      SubnetId: !ImportValue VPC-koutiku-PublicSubnet1A
+      UserData: !Base64 |
+        #!/bin/bash
+        yum update -y
+        yum -y install httpd
+        touch /var/www/html/.check_alive
+        chown apache:apache -R /var/www/html
+        systemctl enable httpd.service
+        systemctl start httpd.service
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: 8
+      Tags:
+        - Key: Name
+          Value: CF-public-1a
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !GetAtt "InstanceSecurityGroup.GroupId"
+  # ---------------------
+  # EC2 for pub sub 1C
+  # ---------------------
+  MyEC2Instance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref EC2AMI
+      InstanceType: t2.micro
+      SubnetId: !ImportValue VPC-koutiku-PublicSubnet1C
+      UserData: !Base64 |
+        #!/bin/bash
+        yum update -y
+        yum -y install httpd
+        touch /var/www/html/.check_alive
+        chown apache:apache -R /var/www/html
+        systemctl enable httpd.service
+        systemctl start httpd.service
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: 8
+      Tags:
+        - Key: Name
+          Value: CF-public-1c
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !GetAtt "InstanceSecurityGroup.GroupId"
+  # ---------------------
+  # Security Group
+  # ---------------------
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: connect with ssh,HTTP,HTTPS
+      VpcId: !ImportValue VPC-koutiku-VPCID
+      Tags:
+        - Key: Name
+          Value: CF-secGP
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+  # ---------------------
+  # ELB
+  # ---------------------
+  InternetELB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: CF-elb
+      SecurityGroups:
+        - !Ref InstanceSecurityGroup
+      Subnets:
+        - !ImportValue VPC-koutiku-PublicSubnet1A
+        - !ImportValue VPC-koutiku-PublicSubnet1C
+
+  ELBtargetGP:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: ELBtargetGP
+      Port: 80
+      Protocol: HTTP
+      Targets:
+        - Id: !Ref MyEC2Instance1
+        - Id: !Ref MyEC2Instance2
+      TargetType: instance
+      VpcId: !ImportValue VPC-koutiku-VPCID
+
+  ELBListenerHTTP: # 80=>443
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - InternetELB
+    Properties:
+      DefaultActions:
+        - Type: redirect
+          RedirectConfig:
+            Protocol: HTTPS
+            Port: 443
+            Host: '#{host}'
+            Path: '/#{path}'
+            Query: '#{query}'
+            StatusCode: HTTP_301
+      LoadBalancerArn: !Ref InternetELB
+      Port: 80
+      Protocol: HTTP
+
+  ELBListenerHTTPS: # set SSL and send to TargetGroup
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: InternetELB
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref Kadai4ACM
+      DefaultActions:
+        - TargetGroupArn: !Ref ELBtargetGP
+          Type: forward
+      LoadBalancerArn: !Ref InternetELB
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+
+  ListenerRule1:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ELBListenerHTTPS
+      Priority: 2
+      Conditions:
+        - Field: host-header
+          HostHeaderConfig:
+            Values:
+              - !Ref DomainName
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ELBtargetGP
+  # ---------------------
+  # Route53
+  # ---------------------
+  Domain1Record: # yumetech.net
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Sub ${HostZoneId}
+      Comment: Zone apex alias targeted to public LoadBalancer.
+      RecordSets:
+        - Name: !Sub ${DomainName}
+          Type: A
+          AliasTarget:
+            HostedZoneId: !GetAtt InternetELB.CanonicalHostedZoneID
+            DNSName: !GetAtt InternetELB.DNSName
+
+  Domain1SubDomainRecord: # www.yumetec.net
+    Type: AWS::Route53::RecordSet
+    DependsOn: InternetELB
+    Properties:
+      HostedZoneId: !Sub '${HostZoneId}'
+      Name: !Sub '${SubDomain}'
+      Type: CNAME
+      TTL: 60
+      ResourceRecords:
+        - !GetAtt InternetELB.DNSName
+
+  # ---------------------
+  # ACM
+  # ---------------------
+  Kadai4ACM:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub '${DomainName}'
+      SubjectAlternativeNames:
+        - !Sub ${SubjectAlternativeName}
+      DomainValidationOptions:
+        - DomainName: !Sub '${DomainName}'
+          HostedZoneId: !Sub '${HostZoneId}'
+      ValidationMethod: DNS
