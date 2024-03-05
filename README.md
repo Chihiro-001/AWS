@@ -6,5 +6,5 @@
 
 ## Table of Contents
 
-1. AWS Auto-Scaling Web Environment with CloudFormation
+- [AWS Auto-Scaling Web Environment with CloudFormation](Auto-Scaling-Web-Environment-with-CloudFormation/README.md)
 
