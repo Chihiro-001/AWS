@@ -131,7 +131,7 @@ Resources:
       TargetType: instance
       VpcId: !ImportValue VPC-koutiku-VPCID
 
-  ELBListenerHTTP: # 80=>443
+  ELBListenerHTTP: # 80=>443に転送
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - InternetELB
@@ -149,7 +149,7 @@ Resources:
       Port: 80
       Protocol: HTTP
 
-  ELBListenerHTTPS: # set SSL and send to TargetGroup
+  ELBListenerHTTPS: # SSL設定してTargetGroupに転送
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn: InternetELB
     Properties:
