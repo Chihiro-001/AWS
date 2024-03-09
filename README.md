@@ -1,4 +1,4 @@
-# AWS　projects
+# AWS projects
 
 ## About
 

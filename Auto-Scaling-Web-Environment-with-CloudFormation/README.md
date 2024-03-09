@@ -36,7 +36,7 @@ The below is a diagram of this project
 
 ## Instruction
 
-The thorough instruction is [here](Auto-Scaling-Web-Environment-with-CloudFormation/docs).
+The thorough instruction is [here](Auto-Scaling-Web-Environment-with-CloudFormation/docs/AWS-Auto-Scaling-Web-Environment-with-CloudFormation.pdf).
 
 ## Closing
 
