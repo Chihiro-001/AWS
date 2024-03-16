@@ -22,7 +22,7 @@ This project demonstrates the use of full AWS CodePipeline incorporating commit,
 
 The below is a diagram of this project
 
-![a screenshot of the AWS CodePipeline ]()
+![a screenshot of the AWS CodePipeline ](CodePipeline/images/aws-codepipeline.png)
 
 ## Instruction
 
