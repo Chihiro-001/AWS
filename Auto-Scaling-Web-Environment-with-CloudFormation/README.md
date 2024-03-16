@@ -36,7 +36,8 @@ The below is a diagram of this project
 
 ## Instruction
 
-The thorough instruction is [here](Auto-Scaling-Web-Environment-with-CloudFormation/docs/AWS-Auto-Scaling-Web-Environment-with-CloudFormation.pdf).
+The instruction is [here](Auto-Scaling-Web-Environment-with-CloudFormation/docs/AWS-Auto-Scaling-Web-Environment-with-CloudFormation.pdf).
+Please note that my target audience is those who already have had used AWS and know how to navigate themselves on AWS Console or those who have Solution Architect Associate level of understanding in AWS.
 
 ## Closing
 
