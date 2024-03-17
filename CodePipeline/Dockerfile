@@ -4,7 +4,7 @@ LABEL maintainer="healthy-living"
 
 COPY index.html /usr/share/nginx/html
 
-COPY style.css /usr/share/nginx/html/images
+COPY style.css /usr/share/nginx/html
 
 COPY images/*.jpeg /usr/share/nginx/html/images
 
