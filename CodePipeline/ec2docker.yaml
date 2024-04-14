@@ -2,7 +2,7 @@
 Description:  Underdesk treadmill EC2 Dockerhost Demo
 Parameters:
   LatestAmiId:
-    Description: AMI for Bastion Host (default is latest AmaLinux2)
+    Description: AMI for Bastion Host (default is latest AmazonLinux2)
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
 Resources:
@@ -54,12 +54,12 @@ Resources:
       SubnetId: !Ref SubnetWEBB
       RouteTableId:
         Ref: RouteTableWeb
-  RouteTableAssociationWebC:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Properties:
-      SubnetId: !Ref SubnetWEBC
-      RouteTableId:
-        Ref: RouteTableWeb
+  # RouteTableAssociationWebC:
+  #   Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  #   Properties:
+  #     SubnetId: !Ref SubnetWEBC
+  #     RouteTableId:
+  #       Ref: RouteTableWeb
   SubnetReservedA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -78,15 +78,15 @@ Resources:
       Tags:
         - Key: Name
           Value: sn-reserved-B
-  SubnetReservedC:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 2, !GetAZs '' ]
-      CidrBlock: 10.16.128.0/20
-      Tags:
-        - Key: Name
-          Value: sn-reserved-C
+  # SubnetReservedC:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Select [ 2, !GetAZs '' ]
+  #     CidrBlock: 10.16.128.0/20
+  #     Tags:
+  #       - Key: Name
+  #         Value: sn-reserved-C
   SubnetDBA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -105,15 +105,15 @@ Resources:
       Tags:
         - Key: Name
           Value: sn-db-B
-  SubnetDBC:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 2, !GetAZs '' ]
-      CidrBlock: 10.16.144.0/20
-      Tags:
-        - Key: Name
-          Value: sn-db-C
+  # SubnetDBC:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Select [ 2, !GetAZs '' ]
+  #     CidrBlock: 10.16.144.0/20
+  #     Tags:
+  #       - Key: Name
+  #         Value: sn-db-C
   SubnetAPPA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -132,15 +132,15 @@ Resources:
       Tags:
         - Key: Name
           Value: sn-app-B
-  SubnetAPPC:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 2, !GetAZs '' ]
-      CidrBlock: 10.16.160.0/20
-      Tags:
-        - Key: Name
-          Value: sn-app-C
+  # SubnetAPPC:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Select [ 2, !GetAZs '' ]
+  #     CidrBlock: 10.16.160.0/20
+  #     Tags:
+  #       - Key: Name
+  #         Value: sn-app-C
   SubnetWEBA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -161,16 +161,16 @@ Resources:
       Tags:
         - Key: Name
           Value: sn-web-B
-  SubnetWEBC:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 2, !GetAZs '' ]
-      CidrBlock: 10.16.176.0/20
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: sn-web-C
+  # SubnetWEBC:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Select [ 2, !GetAZs '' ]
+  #     CidrBlock: 10.16.176.0/20
+  #     MapPublicIpOnLaunch: true
+  #     Tags:
+  #       - Key: Name
+  #         Value: sn-web-C
   PublicEC2:
     Type: AWS::EC2::Instance
     Properties:
