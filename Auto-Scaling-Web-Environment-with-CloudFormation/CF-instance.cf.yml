@@ -13,21 +13,21 @@ Parameters:
     Type: String
     Default: 'Z03917251J40DXFLPJW6J'
   DomainName:
-    Description: FQDN of the HostZone yumetech.net
+    Description: FQDN of the HostZone example.net
     Type: String
-    Default: yumetech.net
+    Default: example.net
   SubjectAlternativeName:
     Description: FQDN of the Subdomains.
     Type: String
-    Default: '*.yumetech.net'
+    Default: '*.example.net'
   SubDomain:
     Description: FQDN of the Subdomain
     Type: String
-    Default: www.yumetech.net
+    Default: www.example.net
     
 Resources:
   # ---------------------
-  # EC2 for pub sub 1A
+  # EC2 for public subnet 1A
   # ---------------------
   MyEC2Instance1:
     Type: AWS::EC2::Instance
@@ -55,7 +55,7 @@ Resources:
       SecurityGroupIds:
         - !GetAtt "InstanceSecurityGroup.GroupId"
   # ---------------------
-  # EC2 for pub sub 1C
+  # EC2 for public subnet 1C
   # ---------------------
   MyEC2Instance2:
     Type: AWS::EC2::Instance
@@ -131,10 +131,8 @@ Resources:
       TargetType: instance
       VpcId: !ImportValue VPC-koutiku-VPCID
 
-  ELBListenerHTTP: # 80=>443に転送
+  ELBListenerHTTP: # 80=>443
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - InternetELB
     Properties:
       DefaultActions:
         - Type: redirect
@@ -149,9 +147,8 @@ Resources:
       Port: 80
       Protocol: HTTP
 
-  ELBListenerHTTPS: # SSL設定してTargetGroupに転送
+  ELBListenerHTTPS: # SSL and TargetGroup
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn: InternetELB
     Properties:
       Certificates:
         - CertificateArn: !Ref Kadai4ACM
@@ -179,7 +176,7 @@ Resources:
   # ---------------------
   # Route53
   # ---------------------
-  Domain1Record: # yumetech.net
+  Domain1Record: # example.net
     Type: AWS::Route53::RecordSetGroup
     Properties:
       HostedZoneId: !Sub ${HostZoneId}
@@ -191,9 +188,8 @@ Resources:
             HostedZoneId: !GetAtt InternetELB.CanonicalHostedZoneID
             DNSName: !GetAtt InternetELB.DNSName
 
-  Domain1SubDomainRecord: # www.yumetec.net
+  Domain1SubDomainRecord: # www.example.net
     Type: AWS::Route53::RecordSet
-    DependsOn: InternetELB
     Properties:
       HostedZoneId: !Sub '${HostZoneId}'
       Name: !Sub '${SubDomain}'
