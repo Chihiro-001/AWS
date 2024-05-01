@@ -27,7 +27,10 @@ Resources:
       VpcId: !Ref MyFirstVPC
       CidrBlock: 10.0.0.0/24
       MapPublicIpOnLaunch: true
-      AvailabilityZone: "ap-northeast-1a"
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs
+          Ref: AWS::Region
       Tags:
       - Key: Name
         Value: CF-publicsubnet-1a
@@ -44,7 +47,10 @@ Resources:
       VpcId: !Ref MyFirstVPC
       CidrBlock: 10.0.2.0/24
       MapPublicIpOnLaunch: true
-      AvailabilityZone: "ap-northeast-1c"
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs
+          Ref: AWS::Region
       Tags:
       - Key: Name
         Value: CF-publicsubnet-1c
@@ -68,7 +74,6 @@ Resources:
       InternetGatewayId: !Ref myInternetGateway
   myRoute:
     Type: AWS::EC2::Route
-    DependsOn: myInternetGateway
     Properties:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
