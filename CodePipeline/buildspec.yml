@@ -16,8 +16,8 @@ phases:
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG # tag the built docker image
       # check files copied under particular directories
-      - docker run -rm $REPOSITORY_URI:latest ls -l /usr/share/nginx/html
-      - docker run -rm $REPOSITORY_URI:latest ls -l /usr/share/nginx/html/images
+      - docker run $REPOSITORY_URI:latest ls -l /usr/share/nginx/html
+      - docker run $REPOSITORY_URI:latest ls -l /usr/share/nginx/html/images
   post_build:
     commands:
       - echo -e "Build completed on `date`\nPushing the Docker image..."
