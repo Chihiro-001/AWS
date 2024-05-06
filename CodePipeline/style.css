@@ -1,0 +1,27 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+.header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+.content {
+    margin: 15px;
+}
+.content img {
+    transform: scale(0.6);
+    max-width: 100%;
+    height: auto;
+    margin: -110px;
+}
+.content h2, .content p {
+    margin: 0 0 20px 0;
+}
+.content p {
+    font-size: 25px;
+}
